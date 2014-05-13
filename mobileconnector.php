@@ -23,7 +23,6 @@ class Mobileconnector
 		'gateway' => 'https://gateway.ea.com/proxy/identity/pids/me',
 		'auth' => 'https://accounts.ea.com/connect/auth?client_id=FOS-SERVER&redirect_uri=nucleus:rest&response_type=code&access_token=%s',
 		'sid' => 'https://pas.mob.v4.easfc.ea.com:8095/pow/auth?timestamp=',
-		'userdata' => 'https://pas.mob.v4.easfc.ea.com:8095/pow/user/self/tiergp/NucleusId/tiertp/%s?offset=0&count=50&_=',
 
 		'utasNucId' => '/ut/game/fifa14/user/accountinfo?_=',
 		'utasAuth' => '/ut/auth?timestamp=',
