@@ -31,7 +31,7 @@ class Mobileconnector
 		'utasWatchlist' => '/ut/game/fifa14/watchlist',
 	);
 
-	public function __construct($email, $password, $answer, $platform, $client)
+	public function __construct($client, $email, $password, $answer, $platform)
 	{
 		$this->email = $email;
 		$this->password = $password;

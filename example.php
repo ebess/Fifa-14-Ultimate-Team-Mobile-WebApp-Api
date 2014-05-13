@@ -21,7 +21,7 @@
     start:
     try {
 		// platform needs to be ps3 or something else (xbox, pc etc)
-		$connector = new Mobileconnector('your@email.com', 'your_password', 'secret_answer', 'platform', $client);
+		$connector = new Mobileconnector($client, 'your@email.com', 'your_password', 'secret_answer', 'platform');
 		$connector->connect();
     } catch (Exception $e) {
     	// server down, gotta retry
