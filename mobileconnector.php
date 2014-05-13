@@ -1,5 +1,6 @@
 <?php
 
+require_once 'forge.php';
 
 class Mobileconnector
 {
@@ -49,6 +50,11 @@ class Mobileconnector
 		$this->urls['utasWatchlist'] = $utasServer . $this->urls['utasWatchlist'];
 	}
 
+	private function getForge($url, $method) 
+	{
+		return new Forge($this->client, $url, $method);
+	}
+
 	public function connect()
 	{
 		$url = $this->getLoginUrl();
@@ -70,26 +76,24 @@ class Mobileconnector
 
 	private function getLoginUrl()
 	{
-		$request = $this->client->get($this->urls['login']);
-		$response = $request->send();
-		$url = $response->getInfo('url');
+		$forge = $this->getForge($this->urls['login'], 'get');
+		$data = $forge->sendRequest();
 
-		return $url;
+		return $data['response']->getInfo('url');
 	}
 
 	private function loginAndGetCode($url)
 	{
-        $request = $this->client->post($url, array(), array(
-            "email" => $this->email,
-            "password" => $this->password,
-            "_rememberMe" => "on",
-            "rememberMe" => "on",
-            "_eventId" => "submit"
-        ));
-
-        $response = $request->send();
-
-        $this->code = $response->getBody();
+		$forge = $this->getForge($url, 'post');
+		$this->code = $forge
+			->setBody(array(
+	            "email" => $this->email,
+	            "password" => $this->password,
+	            "_rememberMe" => "on",
+	            "rememberMe" => "on",
+	            "_eventId" => "submit"
+	        ))
+	        ->getBody();
 
         return $this;
 	}
@@ -97,14 +101,11 @@ class Mobileconnector
 	private function enterAnswer()
 	{
 		$url = sprintf ($this->urls['answer'], $this->code, $this->clientSecret);
-		$request = $this->client->post($url);
 
-		$request->addHeader('Content-Type', 'application/x-www-form-urlencoded');
-		$request->addHeader('x-wap-profile', 'http://wap.samsungmobile.com/uaprof/GT-I9195.xml');
-		$request->addHeader('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; de-de; GT-I9195 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30');
-
-		$response = $request->send();
-		$json = $response->json();
+		$forge = $this->getForge($url, 'post');
+		$json = $forge
+			->addHeader('Content-Type', 'application/x-www-form-urlencoded')
+			->getJson();
 
 		$this->accessToken = $json['access_token'];
 
@@ -113,14 +114,10 @@ class Mobileconnector
 
 	private function gatewayMe()
 	{
-		$request = $this->client->get($this->urls['gateway']);
-
-		$request->addHeader('Authorization', 'Bearer ' . $this->accessToken);
-		$request->addHeader('x-wap-profile', 'http://wap.samsungmobile.com/uaprof/GT-I9195.xml');
-		$request->addHeader('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; de-de; GT-I9195 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30');
-
-		$response = $request->send();
-		$json = $response->json();
+		$forge = $this->getForge($this->urls['gateway'], 'get');
+		$json = $forge
+			->addHeader('Authorization', 'Bearer ' . $this->accessToken)
+			->getJson();
 
 		$this->nucId = $json['pid']['pidId'];
 
@@ -130,10 +127,9 @@ class Mobileconnector
 	private function auth()
 	{
 		$url = sprintf ($this->urls['auth'], $this->accessToken);
-		$request = $this->client->get($url);
-		$response = $request->send();
+		$forge = $this->getForge($url, 'get');
+		$json = $forge->getJson();
 
-		$json = $response->json();
 		$this->authCode = $json['code'];
 
         return $this;
@@ -142,41 +138,40 @@ class Mobileconnector
 
 	private function getSid()
 	{
-		$request = $this->client->post($this->urls['sid']);
+		$forge = $this->getForge($this->urls['sid'], 'post');
+		$data = $forge
+			->setSid('')
+			->setPid('')
+			->setBody(array(
+				'isReadOnly' 		=> true,
+				'sku' 				=> 'FUT14AND',
+				'clientVersion' 	=> 8,
+				'locale'			=> 'de-DE',
+				'method'			=> 'authcode',
+				'priorityLevel'		=> 4,
+				'identification'	=> array(
+					'authCode' 		=> $this->authCode,
+					'redirectUrl'	=> 'nucleus:rest'
+				),
+			), true)
+			->sendRequest();
 
-		$request->addHeader('X-UT-SID', '');
-		$request->addHeader('X-POW-SID', '');
-		$request->addHeader('Content-Type', 'application/json');
-		$request->addHeader('Accept', 'text/plain, */*; q=0.01');
-		$request->addHeader('x-wap-profile', 'http://wap.samsungmobile.com/uaprof/GT-I9195.xml');
-		$request->addHeader('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; de-de; GT-I9195 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30');
-
-		$request->setBody('{"isReadOnly":true,"sku":"FUT14AND","clientVersion":8,"locale":"de-DE","method":"authcode","priorityLevel":4,"identification":{"authCode":"'.$this->authCode.'","redirectUrl":"nucleus:rest"}}');
-
-		$response = $request->send();
-		$json = $response->json();
-
+		$json = $data['response']->json();
 		$this->sid = $json['sid'];
-		$this->pid = $response->getHeader('X-POW-SID');
+		$this->pid = $data['response']->getHeader('X-POW-SID');
+
 
         return $this;
 	}
 
 	private function utasRefreshNucId()
 	{
-		$url = $this->urls['utasNucId'];
-		$request = $this->client->get($url);
-
-		$request->addHeader('X-UT-SID', '');
-		$request->addHeader('X-POW-SID', $this->pid);
-		$request->addHeader('Easw-Session-Data-Nucleus-Id', $this->nucId);
-		$request->addHeader('Content-Type', 'application/json');
-		$request->addHeader('Accept', 'text/plain, */*; q=0.01');
-		$request->addHeader('x-wap-profile', 'http://wap.samsungmobile.com/uaprof/GT-I9195.xml');
-		$request->addHeader('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; de-de; GT-I9195 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30');
-
-		$response = $request->send();
-		$json = $response->json();
+		$forge = $this->getForge($this->urls['utasNucId'], 'get');
+		$json = $forge
+			->setSid('')
+			->setPid($this->pid)
+			->setNucId($this->nucId)
+			->getJson();
 
 		$this->nucId = $json['userAccountInfo']['personas'][0]['personaId'];
 
@@ -185,19 +180,24 @@ class Mobileconnector
 
 	private function utasAuth()
 	{
-		$url = $this->urls['utasAuth'];
-		$request = $this->client->post($url);
-
-		$request->addHeader('X-UT-SID', '');
-		$request->addHeader('X-POW-SID', '');
-		$request->addHeader('Accept', 'text/plain, */*; q=0.01');
-		$request->addHeader('x-wap-profile', 'http://wap.samsungmobile.com/uaprof/GT-I9195.xml');
-		$request->addHeader('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; de-de; GT-I9195 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30');
-
-		$request->setBody('{"isReadOnly":false,"sku":"FUT14AND","clientVersion":8,"locale":"de-DE","method":"authcode","priorityLevel":4,"identification":{"authCode":"'.$this->authCode.'","redirectUrl":"nucleus:rest"},"nucleusPersonaId":'.$this->nucId.'}');
-
-		$response = $request->send();
-		$json = $response->json();
+		$forge = $this->getForge($this->urls['utasAuth'], 'post');
+		$json = $forge
+			->setSid('')
+			->setPid('')
+			->setBody(array(
+				'isReadOnly' 		=> true,
+				'sku' 				=> 'FUT14AND',
+				'clientVersion' 	=> 8,
+				'locale'			=> 'de-DE',
+				'method'			=> 'authcode',
+				'priorityLevel'		=> 4,
+				'identification'	=> array(
+					'authCode' 		=> $this->authCode,
+					'redirectUrl'	=> 'nucleus:rest'
+				),
+				'nucleusPersonaId'	=> $this->nucId
+			), true)
+			->getJson();
 
 		$this->sid = $json['sid'];
 
@@ -207,42 +207,29 @@ class Mobileconnector
 	private function utasQuestion()
 	{
 		$url = sprintf ($this->urls['utasQuestion'], $this->answerHash);
-		$request = $this->client->post($url);
 
-		$request->addHeader('X-UT-SID', $this->sid);
-		$request->addHeader('X-POW-SID', $this->pid);
-		$request->addHeader('Easw-Session-Data-Nucleus-Id', $this->nucId);
-		$request->addHeader('Content-Type', 'application/json');
-		$request->addHeader('Accept', 'text/plain, */*; q=0.01');
-		$request->addHeader('x-wap-profile', 'http://wap.samsungmobile.com/uaprof/GT-I9195.xml');
-		$request->addHeader('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; de-de; GT-I9195 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30');
-
-		$response = $request->send();
-		$json = $response->json();
+		$forge = $this->getForge($url, 'post');
+		$json = $forge
+			->setSid($this->sid)
+			->setPid($this->pid)
+			->setNucId($this->nucId)
+			->setSid($this->sid)
+			->getJson();
 
 		$this->phishingToken = $json['token'];
 
 		return $this;
 	}
 
-
     private function getWatchlist()
     {
-		$url = $this->urls['utasWatchlist'];
-		$request = $this->client->get($url);
-
-		$request->addHeader('X-UT-SID', $this->sid);
-		$request->addHeader('X-POW-SID', $this->pid);
-		$request->addHeader('X-UT-PHISHING-TOKEN', $this->phishingToken);
-		$request->addHeader('Easw-Session-Data-Nucleus-Id', $this->nucId);
-
-		$request->addHeader('Content-Type', 'application/json');
-		$request->addHeader('Accept', 'text/plain, */*; q=0.01');
-		$request->addHeader('x-wap-profile', 'http://wap.samsungmobile.com/uaprof/GT-I9195.xml');
-		$request->addHeader('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; de-de; GT-I9195 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30');
-
-        $response = $request->send();
-        $json = $response->json();
+    	$forge = $this->getForge($this->urls['utasWatchlist'], 'get');
+    	$json = $forge
+			->setSid($this->sid)
+			->setPid($this->pid)
+			->setNucId($this->nucId)
+			->setPhishing($this->phishingToken)
+			->getJson();
 
         echo "watchlist count: " . count($json['auctionInfo']) . PHP_EOL;
     }

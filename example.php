@@ -19,13 +19,10 @@
 
     start:
     try {
-		
 		// platform needs to be ps3 or something else (xbox, pc etc)
 		$connector = new Mobileconnector('your@email.com', 'your_password', 'secret_answer', 'platform', $client);
 		$connector->connect();
-
     } catch (Exception $e) {
-    	
     	// server down, gotta retry
     	if (preg_match("/service unavailable/mi", $e->getMessage())) {
     		echo "EA Server down, retry! " . PHP_EOL;
@@ -34,5 +31,4 @@
     	} else {
     		die('Failed to login' . PHP_EOL);
     	}
-    	
     }
