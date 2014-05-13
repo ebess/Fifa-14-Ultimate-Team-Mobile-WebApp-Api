@@ -16,6 +16,6 @@ Example: (also see example.php)
     $cookiePlugin = new CookiePlugin($cookieJar);
     $client->addSubscriber($cookiePlugin);
 
-	$connector = new Mobileconnector('your@email.com', 'your_password', 'secret_answer', 'xbox', $client);
+	$connector = new Mobileconnector($client, 'your@email.com', 'your_password', 'secret_answer', 'xbox');
 	$connector->connect();
 ```
