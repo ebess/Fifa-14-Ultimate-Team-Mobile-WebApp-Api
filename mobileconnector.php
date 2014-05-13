@@ -1,7 +1,5 @@
 <?php
 
-require_once 'forge.php';
-
 class Mobileconnector
 {
 	private $email;

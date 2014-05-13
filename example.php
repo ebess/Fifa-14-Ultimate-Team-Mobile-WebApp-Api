@@ -4,6 +4,7 @@
 
     require_once __DIR__ . "/vendor/autoload.php";
     require_once __DIR__ . "/eahashor.php";
+    require_once __DIR__ . "/forge.php";
     require_once __DIR__ . "/mobileconnector.php";
 
 
