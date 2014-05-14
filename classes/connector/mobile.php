@@ -36,15 +36,15 @@ class Connector_Mobile extends Connector_Abstract
      * @var string[]
      */
     protected $urls = array(
-        'login' => 'https://accounts.ea.com/connect/auth?client_id=FIFA-MOBILE-COMPANION&response_type=code&display=mobile/login&scope=basic.identity+offline+signin&locale=de&prompt=login',
-        'answer' => 'https://accounts.ea.com/connect/token?grant_type=authorization_code&code=%s&client_id=FIFA-MOBILE-COMPANION&client_secret=%s',
-        'gateway' => 'https://gateway.ea.com/proxy/identity/pids/me',
-        'auth' => 'https://accounts.ea.com/connect/auth?client_id=FOS-SERVER&redirect_uri=nucleus:rest&response_type=code&access_token=%s',
-        'sid' => 'https://pas.mob.v4.easfc.ea.com:8095/pow/auth?timestamp=',
+        'login'         => 'https://accounts.ea.com/connect/auth?client_id=FIFA-MOBILE-COMPANION&response_type=code&display=mobile/login&scope=basic.identity+offline+signin&locale=de&prompt=login',
+        'answer'        => 'https://accounts.ea.com/connect/token?grant_type=authorization_code&code=%s&client_id=FIFA-MOBILE-COMPANION&client_secret=%s',
+        'gateway'       => 'https://gateway.ea.com/proxy/identity/pids/me',
+        'auth'          => 'https://accounts.ea.com/connect/auth?client_id=FOS-SERVER&redirect_uri=nucleus:rest&response_type=code&access_token=%s',
+        'sid'           => 'https://pas.mob.v4.easfc.ea.com:8095/pow/auth?timestamp=',
 
-        'utasNucId' => '/ut/game/fifa14/user/accountinfo?_=',
-        'utasAuth' => '/ut/auth?timestamp=',
-        'utasQuestion' => '/ut/game/fifa14/phishing/validate?answer=%s&timestamp=',
+        'utasNucId'     => '/ut/game/fifa14/user/accountinfo?_=',
+        'utasAuth'      => '/ut/auth?timestamp=',
+        'utasQuestion'  => '/ut/game/fifa14/phishing/validate?answer=%s&timestamp=',
         'utasWatchlist' => '/ut/game/fifa14/watchlist',
     );
 
