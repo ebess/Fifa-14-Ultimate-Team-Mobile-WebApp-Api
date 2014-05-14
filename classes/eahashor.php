@@ -1,6 +1,8 @@
 <?php
 
-
+/**
+ * Class EAHashor
+ */
 class EAHashor
 {
     public static $R1Shifts = array( 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22 );

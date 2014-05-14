@@ -1,12 +1,7 @@
 <?php
 
-
-
     require_once __DIR__ . "/vendor/autoload.php";
-    require_once __DIR__ . "/eahashor.php";
-    require_once __DIR__ . "/forge.php";
-    require_once __DIR__ . "/mobileconnector.php";
-
+    require_once __DIR__ . "/autoload.php";
 
 	use Guzzle\Http\Client;
 	use Guzzle\Plugin\Cookie\CookiePlugin;
@@ -21,7 +16,7 @@
     start:
     try {
 		// platform needs to be ps3 or something else (xbox, pc etc)
-		$connector = new Mobileconnector($client, 'your@email.com', 'your_password', 'secret_answer', 'platform');
+		$connector = new Connector_Mobile($client, 'your@email.com', 'your_password', 'secret_answer', 'platform');
 		$connector->connect();
     } catch (Exception $e) {
     	// server down, gotta retry
