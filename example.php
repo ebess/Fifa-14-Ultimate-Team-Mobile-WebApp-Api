@@ -16,8 +16,12 @@
     start:
     try {
 		// platform needs to be ps3 or something else (xbox, pc etc)
-		$connector = new Connector_Mobile($client, 'your@email.com', 'your_password', 'secret_answer', 'platform');
-		$connector->connect();
+		$connector = new Connector($client, 'your@email.com', 'your_password', 'secret_answer', 'platform');
+        $export = $connector
+            ->connect('Mobile') // there are 'Mobile' and 'WebApp' available
+            ->export();
+
+        print_r($export);
     } catch (Exception $e) {
     	// server down, gotta retry
     	if (preg_match("/service unavailable/mi", $e->getMessage())) {

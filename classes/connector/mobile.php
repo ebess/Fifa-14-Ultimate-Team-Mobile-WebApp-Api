@@ -10,47 +10,32 @@ class Connector_Mobile extends Connector_Abstract
     /**
      * @var string
      */
-    private $code;
+    protected $code;
 
     /**
      * @var string
      */
-    private $authCode;
+    protected $authCode;
 
     /**
      * @var string
      */
-    private $accessToken;
+    protected $accessToken;
 
     /**
      * @var string
      */
-    private $sid;
+    protected $pid;
 
     /**
      * @var string
      */
-    private $pid;
-
-    /**
-     * @var string
-     */
-    private $nucId;
-
-    /**
-     * @var string
-     */
-    private $phishingToken;
-
-    /**
-     * @var string
-     */
-    private $clientSecret = 's92fi307abf8dcb7362cfe73cf45a06e';
+    protected $clientSecret = 's92fi307abf8dcb7362cfe73cf45a06e';
 
     /**
      * @var string[]
      */
-    private $urls = array(
+    protected $urls = array(
         'login' => 'https://accounts.ea.com/connect/auth?client_id=FIFA-MOBILE-COMPANION&response_type=code&display=mobile/login&scope=basic.identity+offline+signin&locale=de&prompt=login',
         'answer' => 'https://accounts.ea.com/connect/token?grant_type=authorization_code&code=%s&client_id=FIFA-MOBILE-COMPANION&client_secret=%s',
         'gateway' => 'https://gateway.ea.com/proxy/identity/pids/me',
@@ -101,8 +86,23 @@ class Connector_Mobile extends Connector_Abstract
             ->utasAuth()
             ->utasQuestion();
 
-        // check watchlist
-        $this->getWatchlist();
+        return $this;
+    }
+
+    /**
+     * exports needed data to reconnect again with actually login
+     *
+     * @return string[]
+     */
+    public function exportLoginData()
+    {
+        return array(
+            'nucleusId' => $this->nucId,
+            'sessionId' => $this->sid,
+            'cookies' => null,
+            'phishingToken' => $this->phishingToken,
+            'pid' => $this->pid
+        );
     }
 
     /**
@@ -219,7 +219,7 @@ class Connector_Mobile extends Connector_Abstract
 
         $json = $data['response']->json();
         $this->sid = $json['sid'];
-        $this->pid = $data['response']->getHeader('X-POW-SID');
+        $this->pid = (string) $data['response']->getHeader('X-POW-SID');
 
 
         return $this;
@@ -295,22 +295,6 @@ class Connector_Mobile extends Connector_Abstract
         $this->phishingToken = $json['token'];
 
         return $this;
-    }
-
-    /**
-     * get watchlist count: test
-     */
-    private function getWatchlist()
-    {
-        $forge = $this->getForge($this->urls['utasWatchlist'], 'get');
-        $json = $forge
-            ->setSid($this->sid)
-            ->setPid($this->pid)
-            ->setNucId($this->nucId)
-            ->setPhishing($this->phishingToken)
-            ->getJson();
-
-        echo "watchlist count: " . count($json['auctionInfo']) . PHP_EOL;
     }
 
 }

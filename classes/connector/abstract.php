@@ -36,6 +36,21 @@ abstract class Connector_Abstract
     protected $answer;
 
     /**
+     * @var string
+     */
+    protected $sid;
+
+    /**
+     * @var string
+     */
+    protected $nucId;
+
+    /**
+     * @var string
+     */
+    protected $phishingToken;
+
+    /**
      * creates a connector with given credentials
      *
      * @param Guzzle\Http\Client $client
@@ -57,9 +72,16 @@ abstract class Connector_Abstract
     /**
      * connects to the api
      *
-     * @return void
+     * @return $this
      */
     abstract public function connect();
+
+    /**
+     * exports the login data
+     *
+     * @return array
+     */
+    abstract public function exportLoginData();
 
     /**
      * initialize a request forge and returns it
