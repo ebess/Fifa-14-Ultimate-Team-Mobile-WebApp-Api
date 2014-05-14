@@ -76,7 +76,7 @@ class Connector_Mobile extends Connector_Abstract
     {
         parent::__construct($client, $email, $password, $answer, $platform);
 
-        $utasServer = ($platform == 'ps3') ? 'https://utas.s2.fut.ea.com' : 'https://utas.fut.ea.com';
+        $utasServer = ($platform == 'xbox360') ? 'https://utas.fut.ea.com' : 'https://utas.s2.fut.ea.com';
         $this->urls['utasNucId'] = $utasServer . $this->urls['utasNucId'];
         $this->urls['utasAuth'] = $utasServer . $this->urls['utasAuth'];
         $this->urls['utasQuestion'] = $utasServer . $this->urls['utasQuestion'];
