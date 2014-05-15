@@ -1,4 +1,18 @@
 {
+    "name": "fut/connectors",
+    "description": "Connectors for Fifa Ultimate Team.",
+    "authors": [
+        {
+            "name": "Eduard Bess",
+            "email": "eduard.bess@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-0" : {
+            "Fut" : "src"
+        }
+    },
+    "minimum-stability": "dev",
     "require": {
         "guzzle/guzzle": "3.7.4"
     }
