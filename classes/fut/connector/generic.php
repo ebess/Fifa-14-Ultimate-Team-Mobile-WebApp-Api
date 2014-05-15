@@ -1,9 +1,14 @@
 <?php
 
+namespace Fut\Connector;
+
+use Fut\EAHashor;
+use Fut\Request\Forge;
+
 /**
  * Class Connector_Abstract
  */
-abstract class Connector_Abstract
+abstract class Generic
 {
     /**
      * @var string
@@ -26,7 +31,7 @@ abstract class Connector_Abstract
     protected $platform;
 
     /**
-     * @var Guzzle\Http\Client
+     * @var \Guzzle\Http\Client
      */
     protected $client;
 
@@ -53,7 +58,7 @@ abstract class Connector_Abstract
     /**
      * creates a connector with given credentials
      *
-     * @param Guzzle\Http\Client $client
+     * @param \Guzzle\Http\Client $client
      * @param string $email
      * @param string $password
      * @param string $answer
@@ -92,7 +97,7 @@ abstract class Connector_Abstract
      */
     protected function getForge($url, $method)
     {
-        return new Request_Forge($this->client, $url, $method);
+        return new Forge($this->client, $url, $method);
     }
 
     /**

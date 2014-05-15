@@ -1,11 +1,13 @@
 <?php
 
+namespace Fut\Connector;
+
 /**
  * connector used to connect as a mobile device
  *
  * Class Connector_Mobile
  */
-class Connector_Mobile extends Connector_Abstract
+class Mobile extends Generic
 {
     /**
      * @var string
@@ -51,7 +53,7 @@ class Connector_Mobile extends Connector_Abstract
     /**
      * creates a connector with given credentials
      *
-     * @param Guzzle\Http\Client $client
+     * @param \Guzzle\Http\Client $client
      * @param string $email
      * @param string $password
      * @param string $answer

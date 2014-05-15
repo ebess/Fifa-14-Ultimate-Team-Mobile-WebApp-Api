@@ -1,12 +1,14 @@
 <?php
 
+namespace Fut\Request;
+
 /**
  * Class Request_Forge
  */
-class Request_Forge
+class Forge
 {
     /**
-     * @var Guzzle\Http\Client
+     * @var \Guzzle\Http\Client
      */
     private $client;
 
@@ -78,7 +80,7 @@ class Request_Forge
     /**
      * creates a request forge for given url and method
      *
-     * @param Guzzle\Http\Client $client
+     * @param \Guzzle\Http\Client $client
      * @param string $url
      * @param string $method
      */
@@ -251,7 +253,7 @@ class Request_Forge
     /**
      * sends the requests and returns the request itself and the response object
      *
-     * @return Guzzle\Http\Message\AbstractMessage[]
+     * @return \Guzzle\Http\Message\AbstractMessage[]
      */
     public function sendRequest()
 	{
@@ -273,7 +275,7 @@ class Request_Forge
      * applies set headers to the request object
      * adds headers, remove headers and adds - if set - the ea specific requests
      *
-     * @param Guzzle\Http\Message\Request $request
+     * @param \Guzzle\Http\Message\Request $request
      * @return $this
      */
     private function applyHeaders($request)
@@ -327,7 +329,7 @@ class Request_Forge
     /**
      * adds the body as a json string to the request body
      *
-     * @param Guzzle\Http\Message\Request $request
+     * @param \Guzzle\Http\Message\Request $request
      * @return $this
      */
     private function applyBody($request)
@@ -360,7 +362,7 @@ class Request_Forge
     /**
      * creates a request with common headers which needed for the connector request
      *
-     * @return Guzzle\Http\Message\Request
+     * @return \Guzzle\Http\Message\Request
      */
     private function forgeRequestWithCommonHeaders()
 	{
@@ -372,7 +374,7 @@ class Request_Forge
     /**
      * adds header for webapp
      *
-     * @param Guzzle\Http\Message\Request $request
+     * @param \Guzzle\Http\Message\Request $request
      */
     private function addEndpointHeadersWebApp($request)
     {
@@ -387,7 +389,7 @@ class Request_Forge
     /**
      * adds headers for mobile
      *
-     * @param Guzzle\Http\Message\Request $request
+     * @param \Guzzle\Http\Message\Request $request
      */
     private function addEndpointHeadersMobile($request)
     {

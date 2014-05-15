@@ -1,5 +1,7 @@
 <?php
 
+namespace Fut;
+
 /**
  * Class EAHashor
  */

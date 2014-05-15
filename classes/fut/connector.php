@@ -1,5 +1,17 @@
 <?php
 
+namespace Fut;
+
+use Fut\Request\Forge;
+use Fut\Connector\WebApp;
+use Fut\Connector\Mobile;
+
+/**
+ * connector class wrapper
+ *
+ * Class Connector
+ * @package Fut
+ */
 class Connector
 {
     /**
@@ -23,7 +35,7 @@ class Connector
     protected $platform;
 
     /**
-     * @var Guzzle\Http\Client
+     * @var \Guzzle\Http\Client
      */
     protected $client;
 
@@ -40,7 +52,7 @@ class Connector
     );
 
     /**
-     * @var null|Connector_Abstract
+     * @var null|\Fut\Connector\Generic
      */
     protected $connector = null;
 
@@ -72,8 +84,8 @@ class Connector
     {
         if (in_array($endpoint, $this->endpoints, true)) {
             // set forge endpoint
-            Request_Forge::setEndpoint($endpoint);
-            $class = "Connector_" . $endpoint;
+            Forge::setEndpoint($endpoint);
+            $class = "Fut\\Connector\\" . $endpoint;
             $this->connector = new $class($this->client, $this->email, $this->password, $this->answer, $this->platform);
 
             $this->connector->connect();

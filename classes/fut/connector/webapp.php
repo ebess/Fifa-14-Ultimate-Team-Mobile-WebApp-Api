@@ -1,11 +1,13 @@
 <?php
 
+namespace Fut\Connector;
+
 /**
  * connector used to connect as a browser web app
  *
  * Class Connector_WebApp
  */
-class Connector_WebApp extends Connector_Abstract
+class WebApp extends Generic
 {
     /**
      * @var string
