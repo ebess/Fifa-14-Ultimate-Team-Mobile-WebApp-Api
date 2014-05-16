@@ -18,6 +18,8 @@
 		// platform needs to be ps3 or something else (xbox, pc etc)
 		$connector = new \Fut\Connector($client, 'your@email.com', 'your_password', 'secret_answer', 'platform');
         $export = $connector
+            ->setClient($client)
+            ->setCookiePlugin($cookiePlugin)
             ->connect('Mobile') // there are 'Mobile' and 'WebApp' available
             ->export();
 
