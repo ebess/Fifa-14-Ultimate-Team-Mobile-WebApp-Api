@@ -1,5 +1,16 @@
 Connector class for mobile endpoint of Fifa 14 Ultimate Team.
-Code is not commented and needs to be refactored which will come next.
+Also you can use composer to install the connectors
+
+ composer.json
+```json
+    ...
+    require {
+        ...
+        "fut/connectors": "v1.0.0"
+        ...
+    }
+    ...
+```
 
 Example: (also see example.php)
 ```php
