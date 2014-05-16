@@ -25,6 +25,11 @@ class Forge
     /**
      * @var null|string
      */
+    private $methodOverride = null;
+
+    /**
+     * @var null|string
+     */
     private $sid = null;
 
     /**
@@ -83,12 +88,14 @@ class Forge
      * @param \Guzzle\Http\Client $client
      * @param string $url
      * @param string $method
+     * @param null|string $methodOverride
      */
-    public function __construct($client, $url, $method)
+    public function __construct($client, $url, $method, $methodOverride = null)
 	{
 		$this->client = $client;
 		$this->url = $url;
 		$this->method = $method;
+        $this->methodOverride = $methodOverride;
 
         $this->setUserAgent();
 	}
@@ -101,6 +108,18 @@ class Forge
     static public function setEndpoint($endpoint)
     {
         static::$endpoint = $endpoint;
+    }
+
+    /**
+     * @param \Guzzle\Http\Client $client $client
+     * @param string $url
+     * @param string $method
+     * @param null|string $methodOverride
+     * @return $this
+     */
+    static public function getForge($client, $url, $method, $methodOverride = null)
+    {
+        return new static($client, $url, $method, $methodOverride);
     }
 
     /**
@@ -366,7 +385,18 @@ class Forge
      */
     private function forgeRequestWithCommonHeaders()
 	{
-		$request = $this->client->{$this->method}($this->url);
+        $request = null;
+        $endpoint = strtolower(static::$endpoint);
+
+        // web app, just take the method as regular
+        if ($endpoint === 'webapp') {
+            $request = $this->client->{$this->method}($this->url);
+
+        // if mobile and method is overridden, take that one otherwise normal given method
+        } elseif ($endpoint === 'mobile') {
+            $method = $this->methodOverride !== null ? $this->methodOverride : $this->method;
+            $request = $this->client->{$method}($this->url);
+        }
 
 		return $request;
 	}
@@ -384,6 +414,9 @@ class Forge
         $request->addHeader('Accept', 'text/html,application/xhtml+xml,application/json,application/xml;q=0.9,image/webp,*/*;q=0.8');
         $request->setHeader('Referer', 'http://www.easports.com/iframe/fut/?baseShowoffUrl=http%3A%2F%2Fwww.easports.com%2Fuk%2Ffifa%2Ffootball-club%2Fultimate-team%2Fshow-off&guest_app_uri=http%3A%2F%2Fwww.easports.com%2Fuk%2Ffifa%2Ffootball-club%2Fultimate-team&locale=en_GB');
         $request->setHeader('Accept-Language', 'en-US,en;q=0.8');
+        if ($this->methodOverride !== null) {
+            $request->addHeader('X-HTTP-Method-Override', strtoupper($this->methodOverride));
+        }
     }
 
     /**
@@ -405,10 +438,13 @@ class Forge
      */
     private function setUserAgent()
     {
-        if (strtolower(static::$endpoint) == 'webapp') {
-            $this->client->setUserAgent('Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36');
-        } elseif (strtolower(static::$endpoint) == 'mobile') {
-            $this->client->setUserAgent('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; de-de; GT-I9195 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30');
+        switch (strtolower(static::$endpoint)) {
+            case 'webapp':
+                $this->client->setUserAgent('Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.62 Safari/537.36');
+                break;
+            case 'mobile':
+                $this->client->setUserAgent('User-Agent', 'Mozilla/5.0 (Linux; U; Android 4.2.2; de-de; GT-I9195 Build/JDQ39) AppleWebKit/534.30 (KHTML, like Gecko) Version/4.0 Mobile Safari/534.30');
+                break;
         }
     }
 

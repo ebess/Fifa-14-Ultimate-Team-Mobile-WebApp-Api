@@ -12,7 +12,6 @@
             "Fut" : "src"
         }
     },
-    "minimum-stability": "dev",
     "require": {
         "guzzle/guzzle": "3.7.4"
     }

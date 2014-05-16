@@ -36,6 +36,11 @@ abstract class Generic
     protected $client;
 
     /**
+     * @var \Guzzle\Plugin\Cookie\CookiePlugin
+     */
+    protected $cookiePlugin;
+
+    /**
      * @var string
      */
     protected $answer;
@@ -58,20 +63,18 @@ abstract class Generic
     /**
      * creates a connector with given credentials
      *
-     * @param \Guzzle\Http\Client $client
      * @param string $email
      * @param string $password
      * @param string $answer
      * @param string $platform
      */
-    public function __construct($client, $email, $password, $answer, $platform)
+    public function __construct($email, $password, $answer, $platform)
     {
         $this->email = $email;
         $this->password = $password;
         $this->answer = $answer;
         $this->platform = $platform;
         $this->answerHash = EAHashor::hash($answer);
-        $this->client = $client;
     }
 
     /**
@@ -87,6 +90,28 @@ abstract class Generic
      * @return array
      */
     abstract public function exportLoginData();
+
+    /**
+     * @param \Guzzle\Http\Client $client
+     * @return $this
+     */
+    public function setClient($client)
+    {
+        $this->client = $client;
+
+        return $this;
+    }
+
+    /**
+     * @param \Guzzle\Plugin\Cookie\CookiePlugin $cookiePlugin
+     * @return $this
+     */
+    public function setCookiePlugin($cookiePlugin)
+    {
+        $this->cookiePlugin = $cookiePlugin;
+
+        return $this;
+    }
 
     /**
      * initialize a request forge and returns it

@@ -53,15 +53,14 @@ class Mobile extends Generic
     /**
      * creates a connector with given credentials
      *
-     * @param \Guzzle\Http\Client $client
      * @param string $email
      * @param string $password
      * @param string $answer
      * @param string $platform
      */
-    public function __construct($client, $email, $password, $answer, $platform)
+    public function __construct($email, $password, $answer, $platform)
     {
-        parent::__construct($client, $email, $password, $answer, $platform);
+        parent::__construct($email, $password, $answer, $platform);
 
         $utasServer = ($platform == 'xbox360') ? 'https://utas.fut.ea.com' : 'https://utas.s2.fut.ea.com';
         $this->urls['utasNucId'] = $utasServer . $this->urls['utasNucId'];
@@ -101,9 +100,9 @@ class Mobile extends Generic
         return array(
             'nucleusId' => $this->nucId,
             'sessionId' => $this->sid,
-            'cookies' => null,
             'phishingToken' => $this->phishingToken,
-            'pid' => $this->pid
+            'pid' => $this->pid,
+            'cookies' => $this->cookiePlugin,
         );
     }
 
@@ -249,28 +248,41 @@ class Mobile extends Generic
     /**
      * auth request to the utas server
      *
+     * @param int $retried
      * @return $this
      */
-    private function utasAuth()
+    private function utasAuth($retried = 0)
     {
-        $forge = $this->getForge($this->urls['utasAuth'], 'post');
-        $json = $forge
-            ->setSid('')
-            ->setPid('')
-            ->setBody(array(
-                'isReadOnly' 		=> true,
-                'sku' 				=> 'FUT14AND',
-                'clientVersion' 	=> 8,
-                'locale'			=> 'de-DE',
-                'method'			=> 'authcode',
-                'priorityLevel'		=> 4,
-                'identification'	=> array(
-                    'authCode' 		=> $this->authCode,
-                    'redirectUrl'	=> 'nucleus:rest'
-                ),
-                'nucleusPersonaId'	=> $this->nucId
-            ), true)
-            ->getJson();
+        $json = array();
+        try {
+            $forge = $this->getForge($this->urls['utasAuth'], 'post');
+            $json = $forge
+                ->setSid('')
+                ->setPid('')
+                ->setBody(array(
+                    'isReadOnly' 		=> true,
+                    'sku' 				=> 'FUT14AND',
+                    'clientVersion' 	=> 8,
+                    'locale'			=> 'de-DE',
+                    'method'			=> 'authcode',
+                    'priorityLevel'		=> 4,
+                    'identification'	=> array(
+                        'authCode' 		=> $this->authCode,
+                        'redirectUrl'	=> 'nucleus:rest'
+                    ),
+                    'nucleusPersonaId'	=> $this->nucId
+                ), true)
+                ->getJson();
+
+        } catch (Exception $e) {
+            // server down, gotta retry
+            if ($retried < 5 && preg_match("/service unavailable/mi", $e->getMessage())) {
+                return $this->utasAuth($retried++);
+            // if retried to many times or other exception, delegate exception
+            } else {
+                throw $e;
+            }
+        }
 
         $this->sid = $json['sid'];
 

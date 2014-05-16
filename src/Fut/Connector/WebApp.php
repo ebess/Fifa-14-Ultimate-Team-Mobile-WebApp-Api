@@ -39,15 +39,14 @@ class WebApp extends Generic
     );
 
     /**
-     * @param \Guzzle\Http\Client $client
      * @param string $email
      * @param string $password
      * @param string $answer
      * @param string $platform
      */
-    public function __construct($client, $email, $password, $answer, $platform)
+    public function __construct($email, $password, $answer, $platform)
     {
-        parent::__construct($client, $email, $password, $answer, $platform);
+        parent::__construct($email, $password, $answer, $platform);
 
         if (strtolower($platform) == "xbox360") {
             $this->route = 'https://utas.fut.ea.com:443';
@@ -84,8 +83,8 @@ class WebApp extends Generic
         return array(
             'nucleusId' => $this->nucId,
             'sessionId' => $this->sid,
-            'cookies' => null,
-            'phishingToken' => $this->phishingToken
+            'phishingToken' => $this->phishingToken,
+            'cookies' => $this->cookiePlugin,
         );
     }
 
