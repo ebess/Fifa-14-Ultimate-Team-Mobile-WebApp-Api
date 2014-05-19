@@ -75,6 +75,7 @@ class Connector
         $this->password = $password;
         $this->answer = $answer;
         $this->platform = $platform;
+        Request\Forge::setPlatform($this->platform);
     }
 
     /**

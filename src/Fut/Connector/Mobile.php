@@ -35,6 +35,11 @@ class Mobile extends Generic
     protected $clientSecret = 's92fi307abf8dcb7362cfe73cf45a06e';
 
     /**
+     * @var int
+     */
+    const RETRY_ON_SERVER_DOWN = 3;
+
+    /**
      * @var string[]
      */
     protected $urls = array(
@@ -61,31 +66,38 @@ class Mobile extends Generic
     public function __construct($email, $password, $answer, $platform)
     {
         parent::__construct($email, $password, $answer, $platform);
-
-        $utasServer = ($platform == 'xbox360') ? 'https://utas.fut.ea.com' : 'https://utas.s2.fut.ea.com';
-        $this->urls['utasNucId'] = $utasServer . $this->urls['utasNucId'];
-        $this->urls['utasAuth'] = $utasServer . $this->urls['utasAuth'];
-        $this->urls['utasQuestion'] = $utasServer . $this->urls['utasQuestion'];
-        $this->urls['utasWatchlist'] = $utasServer . $this->urls['utasWatchlist'];
     }
 
     /**
      * connects to the mobile api
+     *
+     * @param int $errors
+     * @return $this
+     * @throws \Exception
      */
-    public function connect()
+    public function connect($errors = 0)
     {
-        $url = $this->getLoginUrl();
-
-        $this
-            ->loginAndGetCode($url)
-            ->enterAnswer()
-            ->gatewayMe()
-            ->auth()
-            ->getSid()
-            ->utasRefreshNucId()
-            ->auth()
-            ->utasAuth()
-            ->utasQuestion();
+        try {
+            $url = $this->getLoginUrl();
+            $this
+                ->loginAndGetCode($url)
+                ->enterAnswer()
+                ->gatewayMe()
+                ->auth()
+                ->getSid()
+                ->utasRefreshNucId()
+                ->auth()
+                ->utasAuth()
+                ->utasQuestion();
+        } catch (\Exception $e) {
+            // server down, gotta retry
+            if ($errors < static::RETRY_ON_SERVER_DOWN && preg_match("/service unavailable/mi", $e->getMessage())) {
+                $this->connect(++$errors);
+            // if retried to many times or other exception, delegate exception
+            } else {
+                throw $e;
+            }
+        }
 
         return $this;
     }
@@ -248,41 +260,28 @@ class Mobile extends Generic
     /**
      * auth request to the utas server
      *
-     * @param int $retried
      * @return $this
      */
-    private function utasAuth($retried = 0)
+    private function utasAuth()
     {
-        $json = array();
-        try {
-            $forge = $this->getForge($this->urls['utasAuth'], 'post');
-            $json = $forge
-                ->setSid('')
-                ->setPid('')
-                ->setBody(array(
-                    'isReadOnly' 		=> true,
-                    'sku' 				=> 'FUT14AND',
-                    'clientVersion' 	=> 8,
-                    'locale'			=> 'de-DE',
-                    'method'			=> 'authcode',
-                    'priorityLevel'		=> 4,
-                    'identification'	=> array(
-                        'authCode' 		=> $this->authCode,
-                        'redirectUrl'	=> 'nucleus:rest'
-                    ),
-                    'nucleusPersonaId'	=> $this->nucId
-                ), true)
-                ->getJson();
-
-        } catch (Exception $e) {
-            // server down, gotta retry
-            if ($retried < 5 && preg_match("/service unavailable/mi", $e->getMessage())) {
-                return $this->utasAuth($retried++);
-            // if retried to many times or other exception, delegate exception
-            } else {
-                throw $e;
-            }
-        }
+        $forge = $this->getForge($this->urls['utasAuth'], 'post');
+        $json = $forge
+            ->setSid('')
+            ->setPid('')
+            ->setBody(array(
+                'isReadOnly' 		=> true,
+                'sku' 				=> 'FUT14AND',
+                'clientVersion' 	=> 8,
+                'locale'			=> 'de-DE',
+                'method'			=> 'authcode',
+                'priorityLevel'		=> 4,
+                'identification'	=> array(
+                    'authCode' 		=> $this->authCode,
+                    'redirectUrl'	=> 'nucleus:rest'
+                ),
+                'nucleusPersonaId'	=> $this->nucId
+            ), true)
+            ->getJson();
 
         $this->sid = $json['sid'];
 
