@@ -74,7 +74,7 @@ abstract class Generic
         $this->password = $password;
         $this->answer = $answer;
         $this->platform = $platform;
-        $this->answerHash = EAHashor::hash($answer);
+        $this->answerHash = EAHashor::getHash($answer);
     }
 
     /**
