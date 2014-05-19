@@ -3,13 +3,9 @@ Also you can use composer to install the connectors
 
  composer.json
 ```json
-    ...
     require {
-        ...
         "fut/connectors": "dev-master"
-        ...
     }
-    ...
 ```
 
 Example: (also see example.php)
