@@ -48,7 +48,7 @@ class WebApp extends Generic
     {
         parent::__construct($email, $password, $answer, $platform);
 
-        if (strtolower($platform) == "xbox360") {
+        if (strtolower($platform) == "xbox") {
             $this->route = 'https://utas.fut.ea.com:443';
         } else {
             $this->route = 'https://utas.s2.fut.ea.com:443';
