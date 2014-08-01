@@ -15,7 +15,7 @@
     },
     "require": {
         "guzzle/guzzle": "3.7.4",
-	    "fut/eahashor": "dev-master",
-	    "fut/request-forge": "dev-master"
+	    "fut/eahashor": "v1.0.0",
+	    "fut/request-forge": "v1.0.0"
     }
 }
