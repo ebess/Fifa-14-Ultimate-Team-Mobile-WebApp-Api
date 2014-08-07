@@ -4,32 +4,56 @@ Also you can use composer to install the connectors
  composer.json
 ```json
     require {
-        "fut/connectors": "dev-master"
+        "fut/connectors": "2.0.*"
     }
 ```
 
 Example: (also see example.php)
 ```php
+    <?php
     require_once __DIR__ . "/vendor/autoload.php";
     require_once __DIR__ . "/autoload.php";
 
-    use Guzzle\Http\Client;
-    use Guzzle\Plugin\Cookie\CookiePlugin;
-    use Guzzle\Plugin\Cookie\CookieJar\ArrayCookieJar;
+    use GuzzleHttp\Client;
+    use GuzzleHttp\Cookie\CookieJar;
+    use GuzzleHttp\Subscriber\Cookie as CookieSubscriber;
+    use Fut\Connector;
+    use Fut\Request\Forge;
 
-    $client = new Client(null);
-    $cookieJar = new ArrayCookieJar();
-    $cookiePlugin = new CookiePlugin($cookieJar);
-    $client->addSubscriber($cookiePlugin);
+    /**
+     * the connector will not export your cookie jar anymore
+     * keep a reference on this object somewhere to inject it on reconnecting
+     */
+    $client = new Client();
+    $cookieJar = new CookieJar();
+    $cookieSubscriber = new CookieSubscriber($cookieJar);
+    $client->getEmitter()->attach($cookieSubscriber);
 
     try {
 
-        // platform needs to be ps3 or something else (xbox, pc etc)
-        $connector = new Fut\Connector('your@email.com', 'your_password', 'secret_answer', 'platform');
+        /**
+         * there are two endpoints at the the moment
+         *
+         * playstation: Forge::PLATFORM_PLAYSTATION
+         * xbox: Forge::PLATFORM_XBOX
+         *
+         * also you can set two different endpoints
+         *
+         * mobile: Forge::ENDPOINT_MOBILE
+         * webapp: Forge::ENDPOINT_WEBAPP
+         *
+         */
+        $connector = new Connector(
+            $client,
+            'your@email.com',
+            'your_password',
+            'secret_answer',
+            Forge::PLATFORM_PLAYSTATION,
+            Forge::ENDPOINT_MOBILE
+        );
+
         $export = $connector
-            ->setClient($client)
-            ->setCookiePlugin($cookiePlugin)
-            ->connect('Mobile') // there are 'Mobile' and 'WebApp' available
+            ->connect()
             ->export();
 
     } catch(Exception $e) {
