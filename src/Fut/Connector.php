@@ -5,6 +5,7 @@ namespace Fut;
 use Fut\Request\Forge;
 use Fut\Connector\WebApp;
 use Fut\Connector\Mobile;
+use GuzzleHttp\Client;
 
 /**
  * connector class wrapper
@@ -35,14 +36,9 @@ class Connector
     protected $platform;
 
     /**
-     * @var \Guzzle\Http\Client
+     * @var Client
      */
     protected $client;
-
-    /**
-     * @var \Guzzle\Plugin\Cookie\CookiePlugin
-     */
-    protected $cookiePlugin;
 
     /**
      * @var string
@@ -50,10 +46,16 @@ class Connector
     protected $answer;
 
     /**
+     * @var string
+     */
+    protected $endpoint;
+
+    /**
      * @var string[]
      */
     protected $endpoints = array(
-        'WebApp', 'Mobile'
+        Forge::ENDPOINT_WEBAPP,
+        Forge::ENDPOINT_MOBILE
     );
 
     /**
@@ -64,58 +66,49 @@ class Connector
     /**
      * creates wrapper connector
      *
+     * @param Client $client
      * @param string $email
      * @param string $password
      * @param string $answer
      * @param string $platform
+     * @param string $endpoint
      */
-    public function __construct($email, $password, $answer, $platform)
+    public function __construct($client, $email, $password, $answer, $platform, $endpoint)
     {
+        $this->client = $client;
         $this->email = $email;
         $this->password = $password;
         $this->answer = $answer;
         $this->platform = $platform;
-        Request\Forge::setPlatform($this->platform);
-    }
-
-    /**
-     * @param \Guzzle\Http\Client $client
-     * @return $this
-     */
-    public function setClient($client)
-    {
-        $this->client = $client;
-
-        return $this;
-    }
-
-    /**
-     * @param \Guzzle\Plugin\Cookie\CookiePlugin $cookiePlugin
-     * @return $this
-     */
-    public function setCookiePlugin($cookiePlugin)
-    {
-        $this->cookiePlugin = $cookiePlugin;
-
-        return $this;
+        $this->endpoint = $endpoint;
+        
+        Forge::setPlatform($this->platform);
+        Forge::setEndpoint($this->endpoint);
     }
 
     /**
      * connect with the appropriate connector
      *
-     * @param string $endpoint
-     * @return null
+     * @return $this
      */
-    public function connect($endpoint = 'WebApp')
+    public function connect()
     {
-        if (in_array($endpoint, $this->endpoints, true)) {
+        if (in_array($this->endpoint, $this->endpoints, true)) {
+
             // set forge endpoint
-            Forge::setEndpoint($endpoint);
-            $class = "Fut\\Connector\\" . $endpoint;
-            $this->connector = new $class($this->email, $this->password, $this->answer, $this->platform);
+            Forge::setEndpoint($this->endpoint);
+
+            switch($this->endpoint) {
+                case Forge::ENDPOINT_WEBAPP:
+                    $this->connector = new WebApp($this->email, $this->password, $this->answer, $this->platform);
+                    break;
+                case Forge::ENDPOINT_MOBILE:
+                    $this->connector = new Mobile($this->email, $this->password, $this->answer, $this->platform);
+                    break;
+            }
+
             $this->connector
-                ->setClient($this->client)
-                ->setCookiePlugin($this->cookiePlugin);
+                ->setClient($this->client);
 
             $this->connector->connect();
         }

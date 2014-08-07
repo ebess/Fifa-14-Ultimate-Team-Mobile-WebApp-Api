@@ -14,8 +14,8 @@
         }
     },
     "require": {
-        "guzzle/guzzle": "3.7.4",
-	    "fut/eahashor": "v1.0.0",
-	    "fut/request-forge": "v1.0.0"
+        "guzzlehttp/guzzle": "4.1.*",
+	    "fut/eahashor": "1.0.0",
+	    "fut/request-forge": "2.0.*"
     }
 }

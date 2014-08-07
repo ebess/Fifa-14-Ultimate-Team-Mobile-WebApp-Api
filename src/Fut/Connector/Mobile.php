@@ -95,7 +95,7 @@ class Mobile extends Generic
                 $this->connect(++$errors);
             // if retried to many times or other exception, delegate exception
             } else {
-                throw $e;
+                throw new \Exception('Could not connect to the mobile endpoint.');
             }
         }
 
@@ -113,8 +113,7 @@ class Mobile extends Generic
             'nucleusId' => $this->nucId,
             'sessionId' => $this->sid,
             'phishingToken' => $this->phishingToken,
-            'pid' => $this->pid,
-            'cookies' => $this->cookiePlugin,
+            'pid' => $this->pid
         );
     }
 
@@ -128,7 +127,7 @@ class Mobile extends Generic
         $forge = $this->getForge($this->urls['login'], 'get');
         $data = $forge->sendRequest();
 
-        return $data['response']->getInfo('url');
+        return $data['response']->getEffectiveUrl();
     }
 
     /**
@@ -149,7 +148,7 @@ class Mobile extends Generic
                 "_eventId" => "submit"
             ))
             ->getBody();
-
+            
         return $this;
     }
 
@@ -233,7 +232,6 @@ class Mobile extends Generic
         $json = $data['response']->json();
         $this->sid = $json['sid'];
         $this->pid = (string) $data['response']->getHeader('X-POW-SID');
-
 
         return $this;
     }

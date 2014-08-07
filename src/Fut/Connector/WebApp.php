@@ -2,6 +2,8 @@
 
 namespace Fut\Connector;
 
+use Fut\Request\Forge;
+
 /**
  * connector used to connect as a browser web app
  *
@@ -9,11 +11,6 @@ namespace Fut\Connector;
  */
 class WebApp extends Generic
 {
-    /**
-     * @var string
-     */
-    protected $route;
-
     /**
      * @var array
      */
@@ -47,12 +44,6 @@ class WebApp extends Generic
     public function __construct($email, $password, $answer, $platform)
     {
         parent::__construct($email, $password, $answer, $platform);
-
-        if (strtolower($platform) == "xbox") {
-            $this->route = 'https://utas.fut.ea.com:443';
-        } else {
-            $this->route = 'https://utas.s2.fut.ea.com:443';
-        }
     }
 
     /**
@@ -84,7 +75,6 @@ class WebApp extends Generic
             'nucleusId' => $this->nucId,
             'sessionId' => $this->sid,
             'phishingToken' => $this->phishingToken,
-            'cookies' => $this->cookiePlugin,
         );
     }
 
@@ -100,7 +90,7 @@ class WebApp extends Generic
             ->removeEndpointHeaders()
             ->sendRequest();
 
-        return $data['response']->getInfo('url');
+        return $data['response']->getEffectiveUrl();
     }
 
     /**
@@ -141,7 +131,7 @@ class WebApp extends Generic
             ->getBody();
 
         if (!preg_match("/var\ EASW_ID = '(\d*)';/", $body, $matches)) {
-            throw new Exception('Login failed.');
+            throw new \Exception('Login failed.');
         }
 
         $this->nucId = $matches[1];
@@ -157,9 +147,13 @@ class WebApp extends Generic
     private function getShards()
     {
         $forge = $this->getForge($this->urls['shards'], 'get');
+        echo $forge
+            ->setNucId($this->nucId)
+            ->setRoute()
+            ->getRequest();
         $forge
             ->setNucId($this->nucId)
-            ->setRoute($this->route)
+            ->setRoute()
             ->sendRequest();
 
         return $this;
@@ -175,7 +169,7 @@ class WebApp extends Generic
         $forge = $this->getForge($this->urls['accounts'], 'get');
         $json = $forge
             ->setNucId($this->nucId)
-            ->setRoute($this->route)
+            ->setRoute()
             ->getJson();
 
         $this->userAccounts = $json;
@@ -210,9 +204,9 @@ class WebApp extends Generic
         );
 
         $forge = $this->getForge($this->urls['sid'], 'post');
-        $json = $forge
+		$json = $forge
             ->setNucId($this->nucId)
-            ->setRoute($this->route)
+            ->setRoute()
             ->setBody($data, true)
             ->getJson();
 
@@ -233,7 +227,7 @@ class WebApp extends Generic
         $json = $forge
             ->setNucId($this->nucId)
             ->setSid($this->sid)
-            ->setRoute($this->route)
+            ->setRoute()
             ->getJson();
 
         $this->questionStatus = $json;
@@ -259,7 +253,7 @@ class WebApp extends Generic
             $json = $forge
                 ->setSid($this->sid)
                 ->setNucId($this->nucId)
-                ->setRoute($this->route)
+                ->setRoute()
                 ->addHeader('Content-Type', 'application/x-www-form-urlencoded')
                 ->setBody(array(
                     'answer' => $this->answerHash

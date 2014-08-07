@@ -4,6 +4,7 @@ namespace Fut\Connector;
 
 use Fut\EAHashor;
 use Fut\Request\Forge;
+use GuzzleHttp\Client;
 
 /**
  * Class Connector_Abstract
@@ -31,14 +32,9 @@ abstract class Generic
     protected $platform;
 
     /**
-     * @var \Guzzle\Http\Client
+     * @var Client
      */
     protected $client;
-
-    /**
-     * @var \Guzzle\Plugin\Cookie\CookiePlugin
-     */
-    protected $cookiePlugin;
 
     /**
      * @var string
@@ -92,7 +88,7 @@ abstract class Generic
     abstract public function exportLoginData();
 
     /**
-     * @param \Guzzle\Http\Client $client
+     * @param Client $client
      * @return $this
      */
     public function setClient($client)
@@ -103,22 +99,11 @@ abstract class Generic
     }
 
     /**
-     * @param \Guzzle\Plugin\Cookie\CookiePlugin $cookiePlugin
-     * @return $this
-     */
-    public function setCookiePlugin($cookiePlugin)
-    {
-        $this->cookiePlugin = $cookiePlugin;
-
-        return $this;
-    }
-
-    /**
      * initialize a request forge and returns it
      *
      * @param string $url
      * @param string $method
-     * @return Request_Forge
+     * @return Forge
      */
     protected function getForge($url, $method)
     {
