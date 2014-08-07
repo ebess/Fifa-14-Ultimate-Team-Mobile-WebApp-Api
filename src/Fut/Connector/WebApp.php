@@ -2,8 +2,6 @@
 
 namespace Fut\Connector;
 
-use Fut\Request\Forge;
-
 /**
  * connector used to connect as a browser web app
  *
