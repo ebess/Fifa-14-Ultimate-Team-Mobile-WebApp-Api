@@ -1,3 +1,9 @@
+*Repository is deprecated*
+For the new Fifa 15 use https://github.com/ebess/Fifa-15-Ultimate-Team-WebApp-Api
+
+
+
+
 Connector class for mobile endpoint of Fifa 14 Ultimate Team.
 Also you can use composer to install the connectors
 
