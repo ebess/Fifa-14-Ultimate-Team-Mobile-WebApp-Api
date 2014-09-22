@@ -1,5 +1,6 @@
-*Repository is deprecated*
-For the new Fifa 15 use https://github.com/ebess/Fifa-15-Ultimate-Team-WebApp-Api
+**Repository is deprecated**
+
+For the new Fifa 15 use [ebess/Fifa-15-Ultimate-Team-WebApp-Api](https://github.com/ebess/Fifa-14-Ultimate-Team-Mobile-WebApp-Api)
 
 
 
